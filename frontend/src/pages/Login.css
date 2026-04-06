@@ -1,0 +1,191 @@
+/* ==========================================
+   Login Page — Deep Space Premium Styles
+   ========================================== */
+
+/* Login page wrapper */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    position: relative;
+}
+
+/* Left panel branding */
+.login-brand {
+    animation: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.login-brand h1 .text-highlight {
+    background: linear-gradient(135deg, hsl(244, 75%, 65%), hsl(262, 83%, 58%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Brand feature cards */
+.login-feature-card {
+    animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+}
+
+.login-feature-card:nth-child(1) {
+    animation-delay: 0.3s;
+}
+
+.login-feature-card:nth-child(2) {
+    animation-delay: 0.45s;
+}
+
+/* Login card */
+.login-card {
+    animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: 0.1s;
+    opacity: 0;
+}
+
+.login-card::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    height: 3px;
+    background: linear-gradient(90deg, hsl(244, 75%, 65%), hsl(262, 83%, 58%), hsl(199, 89%, 48%));
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+.login-card:hover::after {
+    opacity: 1;
+}
+
+/* SSO button */
+.login-sso-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.login-sso-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, hsla(244, 75%, 65%, 0.05), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+}
+
+.login-sso-btn:hover::before {
+    transform: translateX(100%);
+}
+
+/* Divider line */
+.login-divider {
+    position: relative;
+}
+
+.login-divider::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Email input focus glow */
+.login-input:focus {
+    box-shadow: 0 0 0 3px hsla(244, 75%, 65%, 0.15),
+        0 0 20px hsla(244, 75%, 65%, 0.1);
+}
+
+/* Submit button pulse on hover */
+.login-submit-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.login-submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: hsla(0, 0%, 100%, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.login-submit-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Quick access mock user buttons */
+.login-quick-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-quick-btn:hover {
+    transform: translateY(-2px);
+}
+
+.login-quick-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Security badge */
+.login-security-badge {
+    animation: fadeIn 1s ease-out 0.8s forwards;
+    opacity: 0;
+}
+
+/* Error state enhancements */
+.login-error-container {
+    perspective: 1000px;
+}
+
+.login-error-content {
+    background: linear-gradient(135deg, hsla(0, 72%, 51%, 0.1), hsla(0, 72%, 51%, 0.05));
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px hsla(0, 72%, 51%, 0.1);
+    border: 1px solid hsla(0, 72%, 51%, 0.2);
+    transition: all 0.3s ease;
+}
+
+.animate-shake {
+    animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}

@@ -1,0 +1,180 @@
+/* ==========================================
+   Faculty Dashboard — Academic Hub Styles
+   ========================================== */
+
+/* Subject cards stagger */
+.faculty-subjects-grid>div {
+    opacity: 0;
+    animation: slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.faculty-subjects-grid>div:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.faculty-subjects-grid>div:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.faculty-subjects-grid>div:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.faculty-subjects-grid>div:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.faculty-subjects-grid>div:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.faculty-subjects-grid>div:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+/* Subject card background icon */
+.faculty-card-bg-icon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1.5rem;
+    opacity: 0.05;
+    transition: opacity 0.3s;
+}
+
+.faculty-card:hover .faculty-card-bg-icon {
+    opacity: 0.1;
+}
+
+/* Loading spinner */
+.faculty-spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 4px solid hsla(244, 75%, 65%, 0.2);
+    border-top-color: hsl(244, 75%, 65%);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Marks input field */
+.faculty-marks-input {
+    transition: all 0.2s;
+    font-variant-numeric: tabular-nums;
+}
+
+.faculty-marks-input:focus {
+    border-color: hsl(244, 75%, 65%);
+    box-shadow: 0 0 0 3px hsla(244, 75%, 65%, 0.15),
+        0 0 15px hsla(244, 75%, 65%, 0.1);
+}
+
+/* Student row in marks table */
+.faculty-student-row {
+    transition: background 0.2s;
+}
+
+.faculty-student-row:hover {
+    background: hsla(0, 0%, 100%, 0.03);
+}
+
+/* Student avatar in table */
+.faculty-student-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    background: hsla(0, 0%, 100%, 0.05);
+    border: 1px solid hsla(0, 0%, 100%, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: hsl(244, 75%, 65%);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.875rem;
+    transition: transform 0.3s;
+}
+
+.faculty-student-row:hover .faculty-student-avatar {
+    transform: scale(1.1);
+}
+
+/* Save status indicator */
+.faculty-save-indicator {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.faculty-save-success {
+    background: hsla(158, 64%, 52%, 0.1);
+    color: hsl(158, 64%, 52%);
+    border: 1px solid hsla(158, 64%, 52%, 0.2);
+}
+
+.faculty-save-pending {
+    background: hsla(0, 0%, 100%, 0.05);
+    color: hsl(215, 15%, 45%);
+    border: 1px solid hsla(0, 0%, 100%, 0.05);
+}
+
+/* Progress bar for assessment */
+.faculty-progress-bar {
+    height: 0.5rem;
+    background: hsla(0, 0%, 100%, 0.05);
+    border-radius: 9999px;
+    overflow: hidden;
+    border: 1px solid hsla(0, 0%, 100%, 0.05);
+}
+
+.faculty-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, hsl(244, 75%, 65%), hsl(262, 83%, 58%));
+    box-shadow: 0 0 20px 0 hsla(244, 75%, 65%, 0.3);
+    transition: width 1s ease-out;
+}
+
+/* Grade select */
+.faculty-grade-select {
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+}
+
+/* Sticky Header */
+.slaa-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: hsla(240, 10%, 4%, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 0 hsla(0, 0%, 100%, 0.05);
+}
+
+/* Green Pulse Animation */
+@keyframes savePulse {
+    0% {
+        box-shadow: 0 0 0 0 hsla(158, 64%, 52%, 0.4);
+        background-color: hsla(158, 64%, 52%, 0.2);
+    }
+
+    100% {
+        box-shadow: 0 0 0 10px hsla(158, 64%, 52%, 0);
+        background-color: transparent;
+    }
+}
+
+.row-save-pulse {
+    animation: savePulse 0.8s ease-out;
+}

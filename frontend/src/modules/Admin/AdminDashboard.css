@@ -1,0 +1,147 @@
+/* ==========================================
+   Admin Dashboard — Command Center Styles
+   ========================================== */
+
+/* Stats grid stagger animation */
+.admin-stats-grid>div {
+    opacity: 0;
+    animation: slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.admin-stats-grid>div:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.admin-stats-grid>div:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.admin-stats-grid>div:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.admin-stats-grid>div:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+/* Module tiles stagger */
+.admin-modules-grid>a {
+    opacity: 0;
+    animation: slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.admin-modules-grid>a:nth-child(1) {
+    animation-delay: 0.15s;
+}
+
+.admin-modules-grid>a:nth-child(2) {
+    animation-delay: 0.25s;
+}
+
+.admin-modules-grid>a:nth-child(3) {
+    animation-delay: 0.35s;
+}
+
+.admin-modules-grid>a:nth-child(4) {
+    animation-delay: 0.45s;
+}
+
+.admin-modules-grid>a:nth-child(5) {
+    animation-delay: 0.55s;
+}
+
+/* Modal overlay */
+.admin-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: hsla(222, 47%, 11%, 0.95);
+    backdrop-filter: blur(24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+}
+
+/* Modal body animation */
+.admin-modal-body {
+    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Select dropdown custom arrow */
+.admin-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    appearance: none;
+}
+
+/* Evaluation pulse effect */
+.admin-eval-pulse {
+    position: relative;
+}
+
+.admin-eval-pulse::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, hsla(158, 64%, 52%, 0.2), transparent);
+    animation: pulse 2s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0;
+        transform: scale(1.02);
+    }
+}
+
+/* Action button color variants */
+.admin-icon-primary {
+    color: hsl(244, 75%, 65%);
+}
+
+.admin-icon-secondary {
+    color: hsl(199, 89%, 48%);
+}
+
+.admin-icon-accent {
+    color: hsl(262, 83%, 58%);
+}
+
+.admin-icon-warning {
+    color: hsl(38, 92%, 50%);
+}
+
+.admin-icon-success {
+    color: hsl(158, 64%, 52%);
+}
+
+.admin-bg-primary {
+    background: hsla(244, 75%, 65%, 0.1);
+}
+
+.admin-bg-secondary {
+    background: hsla(199, 89%, 48%, 0.1);
+}
+
+.admin-bg-accent {
+    background: hsla(262, 83%, 58%, 0.1);
+}
+
+.admin-bg-warning {
+    background: hsla(38, 92%, 50%, 0.1);
+}
+
+.admin-bg-success {
+    background: hsla(158, 64%, 52%, 0.1);
+}

@@ -1,0 +1,96 @@
+/* ==========================================
+   Student Detail — Profile View Styles
+   ========================================== */
+
+.animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.shadow-glow-primary {
+    box-shadow: 0 0 20px hsla(244, 75%, 65%, 0.2);
+}
+
+/* Strategic Recommendations */
+.border-accent\/20 {
+    border-color: hsla(262, 83%, 58%, 0.2);
+}
+
+.bg-accent\/\[0\.02\] {
+    background-color: hsla(262, 83%, 58%, 0.02);
+}
+
+.text-accent {
+    color: hsl(262, 83%, 58%);
+}
+
+/* Chart Tooltips */
+.recharts-default-tooltip {
+    background-color: rgba(10, 10, 10, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(10px);
+}
+
+/* Scrollbar for Session History */
+.glass-card::-webkit-scrollbar {
+    width: 4px;
+}
+
+.glass-card::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.glass-card::-webkit-scrollbar-thumb {
+    background: hsla(0, 0%, 100%, 0.1);
+    border-radius: 10px;
+}
+
+.glass-card::-webkit-scrollbar-thumb:hover {
+    background: hsla(0, 0%, 100%, 0.2);
+}
+
+/* Table Enhancements */
+.slaa-table th {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 10px;
+    font-weight: 900;
+    color: hsla(0, 0%, 100%, 0.4);
+}
+
+/* Recommendation Priority Badges */
+.bg-danger\/20 {
+    background-color: hsla(0, 84%, 60%, 0.2);
+}
+
+.text-danger {
+    color: hsl(0, 84%, 60%);
+}
+
+.bg-primary\/20 {
+    background-color: hsla(244, 75%, 65%, 0.2);
+}
+
+.text-primary {
+    color: hsl(244, 75%, 65%);
+}
+
+.bg-success\/10 {
+    background-color: hsla(158, 64%, 52%, 0.1);
+}
+
+.text-success {
+    color: hsl(158, 64%, 52%);
+}

@@ -1,0 +1,42 @@
+services:
+  # 1. Express Backend Web Service
+  - type: web
+    name: slaa-api
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        fromContext: static_site_url
+        name: slaa-web
+      - key: MONGODB_URI
+        sync: false # Set in Render Dashboard
+      - key: JWT_SECRET
+        sync: false # Set in Render Dashboard
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false # Set in Render Dashboard
+      - key: CLOUDINARY_API_KEY
+        sync: false # Set in Render Dashboard
+      - key: CLOUDINARY_API_SECRET
+        sync: false # Set in Render Dashboard
+      - key: EMAIL_USER
+        sync: false # Set in Render Dashboard
+      - key: EMAIL_PASS
+        sync: false # Set in Render Dashboard
+
+  # 2. React Frontend Static Site
+  - type: static
+    name: slaa-web
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromContext: web_service_url
+        name: slaa-api

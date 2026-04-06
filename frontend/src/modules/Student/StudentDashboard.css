@@ -1,0 +1,119 @@
+/* ==========================================
+   Student Dashboard — Performance Discovery Styles
+   ========================================== */
+
+.animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.shadow-glow-primary {
+    box-shadow: 0 0 30px hsla(244, 75%, 65%, 0.2);
+}
+
+.shadow-glow-text {
+    text-shadow: 0 0 40px hsla(244, 75%, 65%, 0.5);
+}
+
+/* Radar chart tick styling */
+.recharts-polar-angle-axis-tick-value {
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+/* Table Enhancements */
+.slaa-table th {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 10px;
+    font-weight: 900;
+    color: hsla(0, 0%, 100%, 0.4);
+}
+
+/* Scrollbar for Dashboard */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: hsla(0, 0%, 100%, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: hsla(244, 75%, 65%, 0.3);
+}
+
+/* Recommendation Type Badges */
+.text-primary {
+    color: hsl(244, 75%, 65%);
+}
+
+.bg-primary\/10 {
+    background-color: hsla(244, 75%, 65%, 0.1);
+}
+
+.border-primary\/20 {
+    border-color: hsla(244, 75%, 65%, 0.2);
+}
+
+.border-primary\/30 {
+    border-color: hsla(244, 75%, 65%, 0.3);
+}
+
+.border-accent\/20 {
+    border-color: hsla(262, 83%, 58%, 0.2);
+}
+
+.text-success {
+    color: hsl(158, 64%, 52%);
+}
+
+.bg-success\/10 {
+    background-color: hsla(158, 64%, 52%, 0.1);
+}
+
+.border-success\/20 {
+    border-color: hsla(158, 64%, 52%, 0.2);
+}
+
+.text-warning {
+    color: hsl(35, 92%, 65%);
+}
+
+.bg-warning\/10 {
+    background-color: hsla(35, 92%, 65%, 0.1);
+}
+
+.border-warning\/20 {
+    border-color: hsla(35, 92%, 65%, 0.2);
+}
+
+.text-danger {
+    color: hsl(0, 84%, 60%);
+}
+
+.bg-danger\/10 {
+    background-color: hsla(0, 84%, 60%, 0.1);
+}
+
+.border-danger\/30 {
+    border-color: hsla(0, 84%, 60%, 0.3);
+}
