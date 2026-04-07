@@ -24,6 +24,8 @@
     "nodemailer": "^6.9.1",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
+    "read-excel-file": "^5.8.1",
+    "csv-parser": "^3.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.0"
   },
