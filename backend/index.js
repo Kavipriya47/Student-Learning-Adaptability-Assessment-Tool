@@ -25,6 +25,7 @@ const {
 const { generateOTP, hashOTP, verifyOTP } = require('./utils/otp'); // Added
 
 const app = express();
+app.set('trust proxy', 1); // Required for Render (reverse proxy) — fixes express-rate-limit
 const PORT = process.env.PORT || 5000;
 
 // Ensure uploads directory exists for temporary file processing
