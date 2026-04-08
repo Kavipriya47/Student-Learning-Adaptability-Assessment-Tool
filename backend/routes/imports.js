@@ -74,8 +74,8 @@ router.post('/departments', isAdmin, upload.single('file'), async (req, res) => 
     let successCount = 0;
     let errors = [];
     try {
-        const rows = await parseFile(req.file.path, req.file.originalname);
-        const data = rows.slice(1); // Header: [Name, Code]
+        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        if (!rows || rows.length === 0) throw new Error('The uploaded file contains no data rows.');
 
         // 1. Intelligent Column Mapping
         for (let i = 0; i < rows.length; i++) {
@@ -107,8 +107,8 @@ router.post('/batches', isAdmin, upload.single('file'), async (req, res) => {
     let successCount = 0;
     let errors = [];
     try {
-        const rows = await parseFile(req.file.path, req.file.originalname);
-        const data = rows.slice(1); // Header: [Name, Dept Code]
+        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        if (!rows || rows.length === 0) throw new Error('File has no data rows after the header.');
 
         // 2. Intelligent Column Mapping
         for (let i = 0; i < rows.length; i++) {
@@ -141,9 +141,8 @@ router.post('/subjects', isAdmin, upload.single('file'), async (req, res) => {
     let successCount = 0;
     let errors = [];
     try {
-        const rows = await parseFile(req.file.path, req.file.originalname);
-        const data = rows.slice(1);
-        if (data.length === 0) return res.json({ message: 'File is empty' });
+        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        if (!rows || rows.length === 0) throw new Error('Uploaded file is empty or missing headers.');
 
         const depts = await Department.find().lean();
         const deptMap = new Map(depts.map(d => [d.code, d]));
@@ -190,8 +189,9 @@ router.post('/staff', isAdmin, upload.single('file'), async (req, res) => {
     let successCount = 0;
     let errors = [];
     try {
-        const rows = await parseFile(req.file.path, req.file.originalname);
-        const data = rows.slice(1);
+        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        if (!rows || rows.length === 0) throw new Error('File has no staff records to process.');
+
         const depts = await Department.find().lean();
         const deptMap = new Map(depts.map(d => [d.code, d]));
         const staffOps = [];
@@ -206,9 +206,9 @@ router.post('/staff', isAdmin, upload.single('file'), async (req, res) => {
             if (!name || !email) continue;
 
             try {
-                if (!['Faculty', 'Mentor'].includes(role)) throw new Error(`Invalid role '${role}'.`);
+                if (!['Faculty', 'Mentor'].includes(role)) throw new Error(`Invalid role '${role}'. Only 'Faculty' or 'Mentor' are allowed.`);
                 const dept = deptMap.get(dept_code.toUpperCase());
-                if (!dept) throw new Error(`Department code '${dept_code}' not found.`);
+                if (!dept) throw new Error(`Department code '${dept_code}' not found in the system.`);
 
                 staffOps.push({
                     updateOne: {
@@ -236,8 +236,8 @@ router.post('/staff-mapping', isAdmin, upload.single('file'), async (req, res) =
     let successCount = 0;
     let errors = [];
     try {
-        const rows = await parseFile(req.file.path, req.file.originalname);
-        const data = rows.slice(1);
+        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        if (!rows || rows.length === 0) throw new Error('Mapping file is empty.');
         
         const [subjects, batches, depts, staffMembers] = await Promise.all([
             Subject.find().lean(),
@@ -265,17 +265,13 @@ router.post('/staff-mapping', isAdmin, upload.single('file'), async (req, res) =
                 const subject = subjectMap.get(sub_code.toUpperCase());
                 const dept = deptMap.get(dept_code.toUpperCase());
 
-                if (!staff) throw new Error(`Staff with email '${email}' not found.`);
-                if (!subject) throw new Error(`Subject with code '${sub_code}' not found.`);
+                if (!staff) throw new Error(`Staff with email '${email}' not registered.`);
+                if (!subject) throw new Error(`Subject with code '${sub_code}' not found in catalog.`);
                 if (!dept) throw new Error(`Department code '${dept_code}' not found.`);
 
                 const batchKey = `${batch_name}_${dept._id}`;
                 const batch = batchMap.get(batchKey);
                 if (!batch) throw new Error(`Batch '${batch_name}' not found for department '${dept_code}'.`);
-
-                if (subject.dept_id && subject.dept_id.toString() !== dept._id.toString()) {
-                    throw new Error(`Subject '${sub_code}' does not belong to department '${dept_code}'.`);
-                }
 
                 mappingOps.push({
                     updateOne: {
@@ -303,9 +299,8 @@ router.post('/students', isAdmin, upload.single('file'), async (req, res) => {
     let successCount = 0;
     let errors = [];
     try {
-        const rows = await parseFile(req.file.path, req.file.originalname);
-        const data = rows.slice(1);
-        if (data.length === 0) return res.json({ message: 'File is empty' });
+        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        if (!rows || rows.length === 0) throw new Error('Enrollment file is empty or formatted incorrectly.');
 
         // 1. PRE-FETCH ALL DEPARTMENTS, BATCHES AND USERS (MENTORS)
         const [depts, batches, users] = await Promise.all([
@@ -345,7 +340,7 @@ router.post('/students', isAdmin, upload.single('file'), async (req, res) => {
 
                 if (mentor_email) {
                     const mentor = mentorMap.get(mentor_email.toLowerCase());
-                    if (!mentor) throw new Error(`Mentor email '${mentor_email}' not found.`);
+                    if (!mentor) throw new Error(`Mentor email '${mentor_email}' not found. Please register staff first.`);
                 }
 
                 studentOps.push({
@@ -386,13 +381,20 @@ router.post('/student-attributes', isAdmin, upload.single('file'), async (req, r
     let successCount = 0;
     let errors = [];
     try {
-        const rows = await parseFile(req.file.path, req.file.originalname);
-        const data = rows.slice(1);
-        if (data.length === 0) return res.json({ message: 'File is empty' });
+        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        if (!rows || rows.length === 0) throw new Error('Performance dataset is empty.');
 
         // 1. COLLECT ALL UNIQUE KEYS FOR BULK FETCHING
-        const uniqueRolls = [...new Set(data.map(row => String(row[0] || '').trim().toUpperCase()).filter(Boolean))];
-        const uniqueSubCodes = [...new Set(data.map(row => String(row[5] || '').trim().toUpperCase()).filter(Boolean))];
+        const rollIndices = ['Roll No', 'RollNumber'];
+        const uniqueRolls = [...new Set(rows.map(row => {
+            const r = getCol(row, 'Roll No') || getCol(row, 'RollNumber');
+            return String(r || '').trim().toUpperCase();
+        }).filter(Boolean))];
+        
+        const uniqueSubCodes = [...new Set(rows.map(row => {
+            const s = getCol(row, 'Subject Code') || getCol(row, 'Subject');
+            return String(s || '').trim().toUpperCase();
+        }).filter(Boolean))];
 
         // 2. ONE-SHOT FETCH FOR CACHED LOOKUPS
         const [students, subjects] = await Promise.all([
@@ -407,14 +409,14 @@ router.post('/student-attributes', isAdmin, upload.single('file'), async (req, r
         const rewardOps = [];
         const marksOps = [];
 
-        // 3. PROCESS ROWS with Intelligent Column Mapping (Resilient to Column Shuffling)
+        // 3. PROCESS ROWS
         for (let i = 0; i < rows.length; i++) {
             const roll = getCol(rows[i], 'Roll No') || getCol(rows[i], 'RollNumber');
             const sem = getCol(rows[i], 'Semester');
             const att = getCol(rows[i], 'Attendance %');
             const pts = getCol(rows[i], 'Reward Points');
             const cat = getCol(rows[i], 'Reward Category');
-            const sub_code = getCol(rows[i], 'Subject Code');
+            const sub_code = getCol(rows[i], 'Subject Code') || getCol(rows[i], 'Subject');
             const pt1 = getCol(rows[i], 'PT1');
             const pt2 = getCol(rows[i], 'PT2');
             const asgn = getCol(rows[i], 'Assignment');
@@ -425,7 +427,7 @@ router.post('/student-attributes', isAdmin, upload.single('file'), async (req, r
             try {
                 const rollUpper = roll.toUpperCase();
                 const student = studentMap.get(rollUpper);
-                if (!student) throw new Error(`Student ${rollUpper} not found. Enroll them first.`);
+                if (!student) throw new Error(`Student ${rollUpper} not found. Please enroll them first via the Master Enrollment module.`);
 
                 const targetSem = parseInt(sem) || student.semester;
 
@@ -461,7 +463,7 @@ router.post('/student-attributes', isAdmin, upload.single('file'), async (req, r
                 if (sub_code) {
                     const subUpper = sub_code.toUpperCase();
                     const subject = subjectMap.get(subUpper);
-                    if (!subject) throw new Error(`Subject '${subUpper}' not found.`);
+                    if (!subject) throw new Error(`Subject with code '${subUpper}' not found in the catalog.`);
 
                     const marksData = { updated_by: 'Admin (Bulk Import)', updated_at: Date.now() };
                     if (pt1 !== '') marksData.pt1 = parseFloat(pt1);
@@ -483,14 +485,12 @@ router.post('/student-attributes', isAdmin, upload.single('file'), async (req, r
             }
         }
 
-        // 4. EXECUTE BULK WRITES (FAST)
+        // 4. EXECUTE BULK WRITES
         await Promise.all([
             attendanceOps.length > 0 ? Attendance.bulkWrite(attendanceOps) : Promise.resolve(),
             rewardOps.length > 0 ? Reward.bulkWrite(rewardOps) : Promise.resolve(),
             marksOps.length > 0 ? Marks.bulkWrite(marksOps) : Promise.resolve()
         ]);
-
-        // Bust cache for affected batches (optional, or just wait for TTL)
     } catch (e) {
         return res.status(400).json({ message: 'Critical Error reading dataset', error: e.message });
     }
