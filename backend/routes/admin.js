@@ -336,6 +336,9 @@ router.get('/staff', isAdmin, async (req, res) => {
 
         if (role) {
             query.role = role;
+        } else {
+            // Globally exclude Admins from staff listings for cleaner UI
+            query.role = { $ne: 'Admin' };
         }
 
         if (dept_id) {

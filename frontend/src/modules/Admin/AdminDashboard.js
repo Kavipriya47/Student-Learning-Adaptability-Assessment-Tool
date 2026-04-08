@@ -322,13 +322,6 @@ const AdminDashboard = () => {
                 </div>
                 <div className="flex gap-4">
                     <button
-                        onClick={() => setShowRunEvaluation(true)}
-                        className="btn border border-success/30 text-success bg-success/5 hover:bg-success/10"
-                    >
-                        <TrendingUp size={18} />
-                        Run Evaluation
-                    </button>
-                    <button
                         onClick={() => setShowAddMapping(true)}
                         className="btn btn-primary"
                     >
