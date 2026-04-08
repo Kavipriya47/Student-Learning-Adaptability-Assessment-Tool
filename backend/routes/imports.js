@@ -62,7 +62,12 @@ const parseFile = async (filePath, originalName) => {
         return String(val ?? '').trim();
     };
 
-    return { headers, rows: dataRows, getCol };
+    return { 
+        headers, 
+        rows: dataRows, 
+        getCol, 
+        hasHeader: (name) => headers.includes(name.toLowerCase().trim()) 
+    };
 };
 
 const { isAdmin } = require('../middleware/auth');
@@ -74,20 +79,30 @@ router.post('/departments', isAdmin, upload.single('file'), async (req, res) => 
     let successCount = 0;
     let errors = [];
     try {
-        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        const { rows, getCol, hasHeader } = await parseFile(req.file.path, req.file.originalname);
         if (!rows || rows.length === 0) throw new Error('The uploaded file contains no data rows.');
+
+        // Validate Headers
+        const requiredHeaders = ['Name'];
+        const codeHeaders = ['Code', 'Dept Code', 'Department Code'];
+        if (!hasHeader('Name')) throw new Error('Missing required column: "Name"');
+        if (!codeHeaders.some(h => hasHeader(h))) throw new Error('Missing required column: "Code" or "Dept Code"');
 
         // 1. Intelligent Column Mapping
         for (let i = 0; i < rows.length; i++) {
-            const name = getCol(rows[i], 'Name');
-            const code = (getCol(rows[i], 'Code') || getCol(rows[i], 'Dept Code')).toUpperCase();
-            if (!name || !code) continue;
+            const name = getCol(rows[i], 'Name') || getCol(rows[i], 'Department Name');
+            const code = (getCol(rows[i], 'Code') || getCol(rows[i], 'Dept Code') || getCol(rows[i], 'Department Code')).toUpperCase();
+            
+            if (!name || !code) {
+                errors.push(`Row ${i + 2}: Skipped - Missing ${!name ? 'Name' : 'Code'}`);
+                continue;
+            }
 
             try {
                 await Department.findOneAndUpdate({ code }, { name }, { upsert: true, new: true });
                 successCount++;
             } catch (err) {
-                errors.push(`Row ${i + 2}: ${err.message}`);
+                errors.push(`Row ${i + 2}: Record error - ${err.message}`);
             }
         }
     } catch (e) {
@@ -107,14 +122,22 @@ router.post('/batches', isAdmin, upload.single('file'), async (req, res) => {
     let successCount = 0;
     let errors = [];
     try {
-        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        const { rows, getCol, hasHeader } = await parseFile(req.file.path, req.file.originalname);
         if (!rows || rows.length === 0) throw new Error('File has no data rows after the header.');
+
+        // Header Check
+        if (!hasHeader('Name') && !hasHeader('Batch Name')) throw new Error('Missing required column: "Name" or "Batch Name"');
+        if (!hasHeader('Dept Code') && !hasHeader('Department')) throw new Error('Missing required column: "Dept Code"');
 
         // 2. Intelligent Column Mapping
         for (let i = 0; i < rows.length; i++) {
             const name = getCol(rows[i], 'Name') || getCol(rows[i], 'Batch Name');
             const dept_code = getCol(rows[i], 'Dept Code') || getCol(rows[i], 'Department');
-            if (!name || !dept_code) continue;
+            
+            if (!name || !dept_code) {
+                errors.push(`Row ${i + 2}: Skipped - Missing mandatory fields`);
+                continue;
+            }
 
             try {
                 const dept = await Department.findOne({ code: dept_code.toUpperCase() });
@@ -141,8 +164,12 @@ router.post('/subjects', isAdmin, upload.single('file'), async (req, res) => {
     let successCount = 0;
     let errors = [];
     try {
-        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        const { rows, getCol, hasHeader } = await parseFile(req.file.path, req.file.originalname);
         if (!rows || rows.length === 0) throw new Error('Uploaded file is empty or missing headers.');
+
+        // Header Validation
+        if (!hasHeader('Name') && !hasHeader('Subject Name')) throw new Error('Missing column: "Name" or "Subject Name"');
+        if (!hasHeader('Code') && !hasHeader('Subject Code')) throw new Error('Missing column: "Code" or "Subject Code"');
 
         const depts = await Department.find().lean();
         const deptMap = new Map(depts.map(d => [d.code, d]));
@@ -154,7 +181,10 @@ router.post('/subjects', isAdmin, upload.single('file'), async (req, res) => {
             const dept_code = getCol(rows[i], 'Dept Code') || getCol(rows[i], 'Department');
             const semester = getCol(rows[i], 'Semester');
 
-            if (!name || !code) continue;
+            if (!name || !code || !dept_code) {
+                errors.push(`Row ${i + 2}: Skipped - Missing mandatory columns`);
+                continue;
+            }
 
             try {
                 const dept = deptMap.get(dept_code.toUpperCase());
@@ -189,8 +219,13 @@ router.post('/staff', isAdmin, upload.single('file'), async (req, res) => {
     let successCount = 0;
     let errors = [];
     try {
-        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        const { rows, getCol, hasHeader } = await parseFile(req.file.path, req.file.originalname);
         if (!rows || rows.length === 0) throw new Error('File has no staff records to process.');
+
+        // Header Validation
+        if (!hasHeader('Email')) throw new Error('Missing column: "Email"');
+        if (!hasHeader('Role')) throw new Error('Missing column: "Role"');
+        if (!hasHeader('Name')) throw new Error('Missing column: "Name"');
 
         const depts = await Department.find().lean();
         const deptMap = new Map(depts.map(d => [d.code, d]));
@@ -203,7 +238,10 @@ router.post('/staff', isAdmin, upload.single('file'), async (req, res) => {
             const staff_id = getCol(rows[i], 'Staff ID') || getCol(rows[i], 'ID');
             const dept_code = getCol(rows[i], 'Dept Code') || getCol(rows[i], 'Department');
 
-            if (!name || !email) continue;
+            if (!name || !email || !role) {
+                errors.push(`Row ${i + 2}: Skipped - Missing credentials`);
+                continue;
+            }
 
             try {
                 if (!['Faculty', 'Mentor'].includes(role)) throw new Error(`Invalid role '${role}'. Only 'Faculty' or 'Mentor' are allowed.`);
@@ -236,8 +274,12 @@ router.post('/staff-mapping', isAdmin, upload.single('file'), async (req, res) =
     let successCount = 0;
     let errors = [];
     try {
-        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        const { rows, getCol, hasHeader } = await parseFile(req.file.path, req.file.originalname);
         if (!rows || rows.length === 0) throw new Error('Mapping file is empty.');
+
+        // Header Validation
+        if (!hasHeader('Email') && !hasHeader('Faculty Email')) throw new Error('Missing column: "Faculty Email"');
+        if (!hasHeader('Subject') && !hasHeader('Subject Code')) throw new Error('Missing column: "Subject Code"');
         
         const [subjects, batches, depts, staffMembers] = await Promise.all([
             Subject.find().lean(),
@@ -258,7 +300,10 @@ router.post('/staff-mapping', isAdmin, upload.single('file'), async (req, res) =
             const batch_name = getCol(rows[i], 'Batch Name') || getCol(rows[i], 'Batch');
             const dept_code = getCol(rows[i], 'Dept Code') || getCol(rows[i], 'Department');
 
-            if (!email || !sub_code) continue;
+            if (!email || !sub_code) {
+                errors.push(`Row ${i + 2}: Skipped - Missing mandatory mapping data`);
+                continue;
+            }
 
             try {
                 const staff = staffMap.get(email.toLowerCase());
@@ -299,8 +344,15 @@ router.post('/students', isAdmin, upload.single('file'), async (req, res) => {
     let successCount = 0;
     let errors = [];
     try {
-        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        const { rows, getCol, hasHeader } = await parseFile(req.file.path, req.file.originalname);
         if (!rows || rows.length === 0) throw new Error('Enrollment file is empty or formatted incorrectly.');
+
+        // Header Validation
+        const rollHeaders = ['Roll No', 'RollNumber', 'ID'];
+        const emailHeaders = ['Email', 'EmailAddress'];
+        if (!rollHeaders.some(h => hasHeader(h))) throw new Error('Missing column: "Roll No"');
+        if (!emailHeaders.some(h => hasHeader(h))) throw new Error('Missing column: "Email"');
+        if (!hasHeader('Name')) throw new Error('Missing column: "Name"');
 
         // 1. PRE-FETCH ALL DEPARTMENTS, BATCHES AND USERS (MENTORS)
         const [depts, batches, users] = await Promise.all([
@@ -325,7 +377,10 @@ router.post('/students', isAdmin, upload.single('file'), async (req, res) => {
             const semester = getCol(rows[i], 'Semester');
             const mentor_email = getCol(rows[i], 'Mentor Email') || getCol(rows[i], 'Mentor');
 
-            if (!roll_no || !name || !email) continue;
+            if (!roll_no || !name || !email) {
+                errors.push(`Row ${i + 2}: Skipped - Missing mandatory fields (Roll/Name/Email)`);
+                continue;
+            }
 
             try {
                 const dept = deptMap.get(dept_code);
@@ -381,11 +436,14 @@ router.post('/student-attributes', isAdmin, upload.single('file'), async (req, r
     let successCount = 0;
     let errors = [];
     try {
-        const { rows, getCol } = await parseFile(req.file.path, req.file.originalname);
+        const { rows, getCol, hasHeader } = await parseFile(req.file.path, req.file.originalname);
         if (!rows || rows.length === 0) throw new Error('Performance dataset is empty.');
 
+        // Header Validation
+        const rollHeaders = ['Roll No', 'RollNumber'];
+        if (!rollHeaders.some(h => hasHeader(h))) throw new Error('Missing column: "Roll No"');
+
         // 1. COLLECT ALL UNIQUE KEYS FOR BULK FETCHING
-        const rollIndices = ['Roll No', 'RollNumber'];
         const uniqueRolls = [...new Set(rows.map(row => {
             const r = getCol(row, 'Roll No') || getCol(row, 'RollNumber');
             return String(r || '').trim().toUpperCase();
@@ -422,7 +480,10 @@ router.post('/student-attributes', isAdmin, upload.single('file'), async (req, r
             const asgn = getCol(rows[i], 'Assignment');
             const grade = getCol(rows[i], 'Grade');
 
-            if (!roll) continue;
+            if (!roll) {
+                errors.push(`Row ${i + 2}: Skipped - Missing Roll No`);
+                continue;
+            }
 
             try {
                 const rollUpper = roll.toUpperCase();
