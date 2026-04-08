@@ -781,17 +781,23 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
 
-                                {evaluationResult.warnings && evaluationResult.warnings.length > 0 && (
+                                {evaluationResult.skipped_list && evaluationResult.skipped_list.length > 0 && (
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted uppercase tracking-widest pl-1">
-                                            <Info size={12} />
-                                            Calculation Warnings
+                                            <AlertCircle size={12} className="text-warning" />
+                                            Data Exceptions (Requires Correction)
                                         </div>
-                                        <div className="max-h-32 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-                                            {evaluationResult.warnings.map((w, idx) => (
-                                                <div key={idx} className="text-[11px] p-2 bg-white/5 rounded-lg border border-white/5 flex justify-between">
-                                                    <span className="text-text-dim">Roll: {w.roll}</span>
-                                                    <span className="text-warning/80 italic">{w.error}</span>
+                                        <div className="max-h-40 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+                                            {evaluationResult.skipped_list.map((s, idx) => (
+                                                <div key={idx} className="text-[11px] p-2.5 bg-warning/5 border border-warning/10 rounded-xl flex flex-col gap-1">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-white font-bold">{s.name}</span>
+                                                        <span className="font-mono text-text-dim">{s.roll}</span>
+                                                    </div>
+                                                    <span className="text-warning/90 italic flex items-center gap-1">
+                                                        <Info size={10} />
+                                                        {s.reason}
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
