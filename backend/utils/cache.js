@@ -1,6 +1,6 @@
 // In-memory cache for analytics
 const analyticsCache = new Map();
-const CACHE_TTL = 30 * 1000; // 30 seconds
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
 
 const getCachedAnalytics = (batchId) => {
     const cached = analyticsCache.get(batchId);

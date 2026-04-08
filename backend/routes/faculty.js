@@ -12,46 +12,62 @@ const { clearAnalyticsCache } = require('../utils/cache');
 const { isFacultyOrAdmin } = require('../middleware/auth');
 const isFaculty = isFacultyOrAdmin;
 
-// Get assigned subjects with completion telemetry
+// Get assigned subjects with completion telemetry (Optimized — no N+1 queries)
 router.get('/my-subjects', isFaculty, async (req, res) => {
     try {
-        const subjects = await FacultySubject.find({ faculty_email: req.user.email })
+        const assignments = await FacultySubject.find({ faculty_email: req.user.email })
             .populate('subject_id')
             .populate('dept_id')
             .populate('batch_id')
             .lean();
 
-        const enrichedSubjects = await Promise.all(subjects.map(async (fs) => {
-            if (!fs.subject_id || !fs.dept_id || !fs.batch_id) return null;
+        const validAssignments = assignments.filter(fs => fs.subject_id && fs.dept_id && fs.batch_id);
+        if (validAssignments.length === 0) return res.json([]);
 
-            // Calculate telemetry
-            const enrolledStudentsCount = await Student.countDocuments({
-                dept_id: fs.dept_id._id,
-                batch_id: fs.batch_id._id,
-                semester: fs.subject_id.semester // Only count students in the correct semester
-            });
+        // 1. ONE-SHOT FETCH: All students across all relevant dept+batch+semester combos
+        const studentQueries = validAssignments.map(fs => ({
+            dept_id: fs.dept_id._id,
+            batch_id: fs.batch_id._id,
+            semester: fs.subject_id.semester
+        }));
+        const allStudents = await Student.find({ $or: studentQueries }).select('roll_no dept_id batch_id semester').lean();
 
-            const studentRecords = await Student.find({
-                dept_id: fs.dept_id._id,
-                batch_id: fs.batch_id._id,
-                semester: fs.subject_id.semester
-            }).select('roll_no').lean();
+        // 2. ONE-SHOT FETCH: All marks for those students across all relevant subjects
+        const allSubjectIds = validAssignments.map(fs => fs.subject_id._id);
+        const allRolls = allStudents.map(s => s.roll_no);
+        const allMarks = allRolls.length > 0
+            ? await Marks.find({ student_roll: { $in: allRolls }, subject_id: { $in: allSubjectIds } }).lean()
+            : [];
 
-            const studentRolls = studentRecords.map(s => s.roll_no);
+        // 3. Build lookup structures in memory (fast Map operations)
+        // Key: `deptId_batchId_semester` → [rolls]
+        const studentLookup = new Map();
+        for (const s of allStudents) {
+            const key = `${s.dept_id}_${s.batch_id}_${s.semester}`;
+            if (!studentLookup.has(key)) studentLookup.set(key, []);
+            studentLookup.get(key).push(s.roll_no);
+        }
 
-            // Fetch marks to see how many have entries
-            const marksEntries = await Marks.find({
-                subject_id: fs.subject_id._id,
-                student_roll: { $in: studentRolls }
-            }).lean();
+        // Key: `roll_subjectId` → marks record
+        const marksLookup = new Map();
+        for (const m of allMarks) {
+            marksLookup.set(`${m.student_roll}_${m.subject_id}`, m);
+        }
 
-            // A student is considered 'entered' if they have AT LEAST ONE mark entered for this subject
-            const enteredCount = marksEntries.filter(m =>
-                (m.pt1 !== null && m.pt1 !== undefined) ||
-                (m.pt2 !== null && m.pt2 !== undefined) ||
-                (m.assignment !== null && m.assignment !== undefined) ||
-                m.semester_grade
-            ).length;
+        // 4. BUILD RESPONSE — pure in-memory merging
+        const enrichedSubjects = validAssignments.map(fs => {
+            const key = `${fs.dept_id._id}_${fs.batch_id._id}_${fs.subject_id.semester}`;
+            const rolls = studentLookup.get(key) || [];
+            const enrolledCount = rolls.length;
+
+            const enteredCount = rolls.filter(roll => {
+                const m = marksLookup.get(`${roll}_${fs.subject_id._id}`);
+                if (!m) return false;
+                return (m.pt1 !== null && m.pt1 !== undefined) ||
+                    (m.pt2 !== null && m.pt2 !== undefined) ||
+                    (m.assignment !== null && m.assignment !== undefined) ||
+                    !!m.semester_grade;
+            }).length;
 
             return {
                 id: fs._id,
@@ -64,15 +80,15 @@ router.get('/my-subjects', isFaculty, async (req, res) => {
                 batch_name: fs.batch_id.name,
                 semester: fs.subject_id.semester,
                 telemetry: {
-                    enrolled: enrolledStudentsCount,
+                    enrolled: enrolledCount,
                     entered: enteredCount,
-                    pending: enrolledStudentsCount - enteredCount,
-                    completion_percentage: enrolledStudentsCount === 0 ? 0 : Math.round((enteredCount / enrolledStudentsCount) * 100)
+                    pending: enrolledCount - enteredCount,
+                    completion_percentage: enrolledCount === 0 ? 0 : Math.round((enteredCount / enrolledCount) * 100)
                 }
             };
-        }));
+        });
 
-        res.json(enrichedSubjects.filter(Boolean));
+        res.json(enrichedSubjects);
     } catch (error) {
         console.error('Error fetching assigned subjects:', error);
         res.status(500).json({ message: 'Error fetching assigned subjects' });

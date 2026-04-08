@@ -92,7 +92,7 @@ const ForgotPassword = () => {
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="institutional@bitsathy.ac.in"
+                                        placeholder="yourname@email.com"
                                         className="w-full bg-bg-surface border border-border-subtle rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-primary transition-all font-medium placeholder:text-text-dim/50 shadow-inner"
                                         required
                                     />

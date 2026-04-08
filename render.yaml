@@ -23,9 +23,7 @@ services:
         sync: false # Set in Render Dashboard
       - key: CLOUDINARY_API_SECRET
         sync: false # Set in Render Dashboard
-      - key: EMAIL_USER
-        sync: false # Set in Render Dashboard
-      - key: EMAIL_PASS
+      - key: RESEND_API_KEY
         sync: false # Set in Render Dashboard
 
   # 2. React Frontend Static Site
@@ -36,6 +34,10 @@ services:
     rootDir: frontend
     buildCommand: npm install && npm run build
     publishDir: build
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: REACT_APP_API_URL
         fromContext: web_service_url

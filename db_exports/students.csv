@@ -1,0 +1,16 @@
+_id,roll_no,name,email,dept_id,batch_id,semester,mentor_email
+69c20f21e33d09dec838a23e,23IT05,Student 23IT05,23it05@bitsathy.ac.in,69c20f20e33d09dec838a19d,69c20f20e33d09dec838a1a7,6,mentor.it@bitsathy.ac.in
+69c20f21e33d09dec838a229,23CSE04,Student 23CSE04,23cse04@bitsathy.ac.in,69c20f20e33d09dec838a19c,69c20f20e33d09dec838a1a3,6,mentor.cse@bitsathy.ac.in
+69c20f21e33d09dec838a266,23CB05,Student 23CB05,23cb05@bitsathy.ac.in,69c20f20e33d09dec838a19f,69c20f20e33d09dec838a1af,6,mentor.cb@bitsathy.ac.in
+69c20f21e33d09dec838a23b,23IT02,Student 23IT02,23it02@bitsathy.ac.in,69c20f20e33d09dec838a19d,69c20f20e33d09dec838a1a7,6,mentor.it@bitsathy.ac.in
+69c20f21e33d09dec838a228,23CSE03,Student 23CSE03,23cse03@bitsathy.ac.in,69c20f20e33d09dec838a19c,69c20f20e33d09dec838a1a3,6,mentor.cse@bitsathy.ac.in
+69c20f21e33d09dec838a262,23CB01,Student 23CB01,23cb01@bitsathy.ac.in,69c20f20e33d09dec838a19f,69c20f20e33d09dec838a1af,6,mentor.cb@bitsathy.ac.in
+69c20f21e33d09dec838a23d,23IT04,Student 23IT04,23it04@bitsathy.ac.in,69c20f20e33d09dec838a19d,69c20f20e33d09dec838a1a7,6,mentor.it@bitsathy.ac.in
+69c20f21e33d09dec838a265,23CB04,Student 23CB04,23cb04@bitsathy.ac.in,69c20f20e33d09dec838a19f,69c20f20e33d09dec838a1af,6,mentor.cb@bitsathy.ac.in
+69c20f21e33d09dec838a226,23CSE01,Student 23CSE01,23cse01@bitsathy.ac.in,69c20f20e33d09dec838a19c,69c20f20e33d09dec838a1a3,6,mentor.cse@bitsathy.ac.in
+69c20f21e33d09dec838a23a,23IT01,Student 23IT01,23it01@bitsathy.ac.in,69c20f20e33d09dec838a19d,69c20f20e33d09dec838a1a7,6,mentor.it@bitsathy.ac.in
+69c20f21e33d09dec838a263,23CB02,Student 23CB02,23cb02@bitsathy.ac.in,69c20f20e33d09dec838a19f,69c20f20e33d09dec838a1af,6,mentor.cb@bitsathy.ac.in
+69c20f21e33d09dec838a264,23CB03,Student 23CB03,subha.cb23@bitsathy.ac.in,69c20f20e33d09dec838a19f,69c20f20e33d09dec838a1af,6,mentor.cb@bitsathy.ac.in
+69c20f21e33d09dec838a22a,23CSE05,Student 23CSE05,23cse05@bitsathy.ac.in,69c20f20e33d09dec838a19c,69c20f20e33d09dec838a1a3,6,mentor.cse@bitsathy.ac.in
+69c20f21e33d09dec838a23c,23IT03,Student 23IT03,23it03@bitsathy.ac.in,69c20f20e33d09dec838a19d,69c20f20e33d09dec838a1a7,6,mentor.it@bitsathy.ac.in
+69d4a2ff7804bb867d16f758,7376232CB126,KAVIPRIYA P,kavipriya.cb23@bitsathy.ac.in,69c20f20e33d09dec838a19f,69c20f20e33d09dec838a1af,6,hariharan.cb23@bitsathy.ac.in

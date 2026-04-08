@@ -4,6 +4,7 @@ const fs = require('fs');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const compression = require('compression');
 const path = require('path');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
@@ -74,6 +75,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
+app.use(compression()); // GZIP — reduces response size by up to 80%
 app.use(helmet());
 app.use(morgan('dev'));
 app.get('/health', (req, res) => res.json({ status: 'ok', port: PORT }));

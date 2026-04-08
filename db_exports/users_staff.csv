@@ -1,0 +1,10 @@
+_id,name,email,role,staff_id,dept_id
+69b51eaf3ecb0472543392e4,System Admin,admin@bitsathy.ac.in,Admin,,
+69b528cbe96d2481c6769645,Kavipriya,kavipriyaponnusamy47@gmail.com,Admin,,
+69c20f21e33d09dec838a216,IT Mentor Lead,mentor.it@bitsathy.ac.in,Mentor,M-IT-01,69c20f20e33d09dec838a19d
+69c20f21e33d09dec838a219,Prof. CB Faculty,faculty.cb@bitsathy.ac.in,Faculty,F-CB-01,69c20f20e33d09dec838a19f
+69c20f21e33d09dec838a214,CSE Mentor Lead,mentor.cse@bitsathy.ac.in,Mentor,M-CSE-01,69c20f20e33d09dec838a19c
+69c20f21e33d09dec838a21a,CB Mentor Lead,mentor.cb@bitsathy.ac.in,Mentor,M-CB-01,69c20f20e33d09dec838a19f
+69c20f21e33d09dec838a215,Prof. IT Faculty,faculty.it@bitsathy.ac.in,Faculty,F-IT-01,69c20f20e33d09dec838a19d
+69c20f21e33d09dec838a213,Prof. CSE Faculty,faculty.cse@bitsathy.ac.in,Faculty,F-CSE-01,69c20f20e33d09dec838a19c
+69d373a9b6c0a85d36974555,DR. HARIHARAN K,hariharan.cb23@bitsathy.ac.in,Mentor,ST-3824,69c20f20e33d09dec838a19f

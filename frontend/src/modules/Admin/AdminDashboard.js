@@ -661,14 +661,17 @@ const AdminDashboard = () => {
                                                 </option>
                                                 {subjects
                                                     .filter(s => {
-                                                        const matchesDept = !s.dept_id || s.dept_id === newMapping.dept_id || s.dept_id?._id === newMapping.dept_id;
-                                                        // Ensure subject matches the batch's target semester
-                                                        const matchesSem = newMapping.target_semester
-                                                            ? Number(s.semester) === Number(newMapping.target_semester)
-                                                            : true;
-                                                        return matchesDept && matchesSem;
+                                                        // Convert both to string to ensure reliable matching
+                                                        const subjectDeptId = String(s.dept_id || s.dept_id?._id || '');
+                                                        const targetDeptId = String(newMapping.dept_id || '');
+                                                        
+                                                        // Show subject if it belongs to selected dept OR is a global subject (no dept)
+                                                        const matchesDept = !s.dept_id || subjectDeptId === targetDeptId;
+                                                        
+                                                        // Relax semester matching — show all subjects in dept to avoid data-mismatch hiding
+                                                        return matchesDept;
                                                     })
-                                                    .map(s => <option key={s.id} value={s.id}>{s.name} ({s.code} - Sem {s.semester})</option>)}
+                                                    .map(s => <option key={s.id || s._id} value={s.id || s._id}>{s.name} ({s.code} - Sem {s.semester})</option>)}
                                             </select>
                                             {newMapping.subject_ids.length > 1 && (
                                                 <button

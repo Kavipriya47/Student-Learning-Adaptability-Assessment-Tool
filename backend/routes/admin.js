@@ -373,9 +373,6 @@ router.get('/staff', isAdmin, async (req, res) => {
 // Update or Create Staff (Upsert Logic)
 router.post('/staff', isAdmin, async (req, res) => {
     const { name, email, role, staff_id, dept_id } = req.body;
-    if (email && !email.endsWith('@bitsathy.ac.in')) {
-        return res.status(400).json({ message: `Access Denied: Invalid email domain. Only @bitsathy.ac.in emails are permitted for institutional staff.` });
-    }
     try {
         let user = await User.findOne({ email });
         if (user) {
@@ -657,9 +654,6 @@ router.get('/students', isAdmin, async (req, res) => {
 
 router.post('/students', isAdmin, async (req, res) => {
     const { roll_no, name, email, dept_id, batch_id, semester, mentor_email } = req.body;
-    if (email && !email.endsWith('@bitsathy.ac.in')) {
-        return res.status(400).json({ message: 'Invalid email domain. Only @bitsathy.ac.in emails are permitted for students.' });
-    }
     try {
         // Validation: Ensure batch belongs to the department
         if (batch_id && dept_id) {
