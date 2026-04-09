@@ -43,21 +43,25 @@ router.get('/my-students', isMentorOrAdmin, async (req, res) => {
         const rewardsData = await Reward.find({ student_roll: { $in: studentRolls } }).lean();
         const marksData = await Marks.find({ student_roll: { $in: studentRolls } }).populate('subject_id').lean();
 
-        // Compute dept+batch average reward points for each unique dept+batch combination
+        // Optimized: Compute dept+batch average reward points locally from the fetched rewards
         const deptBatchAvgMap = {};
         const uniqueDeptBatch = [...new Set(students.map(s => `${s.dept_id?._id}_${s.batch_id?._id}`))];
-        await Promise.all(uniqueDeptBatch.map(async (key) => {
+        
+        uniqueDeptBatch.forEach(key => {
             const [deptId, batchId] = key.split('_');
-            const groupRolls = students
+            const rollsInGroup = students
                 .filter(s => String(s.dept_id?._id) === deptId && String(s.batch_id?._id) === batchId)
                 .map(s => s.roll_no);
-            const agg = await Reward.aggregate([
-                { $match: { student_roll: { $in: groupRolls } } },
-                { $group: { _id: '$student_roll', total: { $sum: '$points' } } },
-                { $group: { _id: null, avg: { $avg: '$total' } } }
-            ]);
-            deptBatchAvgMap[key] = agg.length > 0 ? agg[0].avg : 0;
-        }));
+            
+            const groupRewards = rewardsData.filter(r => rollsInGroup.includes(r.student_roll));
+            const rollTotals = {};
+            groupRewards.forEach(r => {
+                rollTotals[r.student_roll] = (rollTotals[r.student_roll] || 0) + (r.points || 0);
+            });
+            
+            const totals = Object.values(rollTotals);
+            deptBatchAvgMap[key] = totals.length > 0 ? totals.reduce((a, b) => a + b, 0) / totals.length : 0;
+        });
 
         const formattedStudents = students.map(s => {
             const roll = s.roll_no;

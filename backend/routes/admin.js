@@ -104,6 +104,11 @@ router.delete('/departments/:id', isAdmin, async (req, res) => {
         // Finally, delete the Department
         const deletedDept = await Department.findByIdAndDelete(deptId);
 
+        // CLEAR CACHE for all affected batches
+        if (batchIds.length > 0) {
+            batchIds.forEach(id => clearAnalyticsCache(id.toString()));
+        }
+
         if (!deletedDept) {
             return res.status(404).json({ message: 'Department not found' });
         }
@@ -795,6 +800,11 @@ router.post('/run-evaluation', isAdmin, async (req, res) => {
         if (!batch) {
             return res.status(404).json({ message: `Evaluation aborted: Batch with ID ${batch_id} does not exist.` });
         }
+
+        // --- DUPLICATE PROTECTION ---
+        // If a cycle with this name already exists for this batch, purge it to prevent duplicates
+        await AdaptabilityHistory.deleteMany({ cycle_name, student_roll: { $in: studentRolls || [] } });
+        // ----------------------------
 
         // 2. Fetch students for the batch
         const students = await Student.find({ batch_id }).populate('dept_id').lean();

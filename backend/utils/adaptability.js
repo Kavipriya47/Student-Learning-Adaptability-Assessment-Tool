@@ -33,9 +33,12 @@
 const GRADE_PERCENT_MAP = {
     S: 95,
     A: 85,
+    'A+': 90,
     B: 75,
+    'B+': 80,
     C: 65,
     D: 55,
+    E: 50,
     F: 40,
     U: 30,
 };
@@ -94,7 +97,10 @@ const calculateAdaptability = ({
             const components = [];
             if (hasValue(m.pt1)) components.push((Number(m.pt1) / 50) * 100);
             if (hasValue(m.pt2)) components.push((Number(m.pt2) / 50) * 100);
-            const sem = gradeToPercentage(m.semester_grade);
+            
+            // Fixed: Robust grade lookup for + variations
+            const grade = String(m.semester_grade || '').toUpperCase();
+            const sem = GRADE_PERCENT_MAP[grade] ?? null;
             if (sem !== null) components.push(sem);
 
             if (components.length > 0) {
@@ -104,6 +110,8 @@ const calculateAdaptability = ({
             }
         }
 
+        // Logic Fix: Only set academicScore if subjects actually had data components.
+        // If student exists but 0 subjects have any marks, academicScore stays null.
         if (subjectAcademics.length > 0) {
             academicScore =
                 subjectAcademics.reduce((s, v) => s + v, 0) / subjectAcademics.length;
@@ -141,34 +149,54 @@ const calculateAdaptability = ({
 
     if (hasValue(rewardPoints)) {
         if (deptAvgRewards > 0) {
-            skillScore = Math.min(100, (Number(rewardPoints) / deptAvgRewards) * 100);
+            // Fix: Capped Normalisation to identify "Superstars" without penalizing "Normal" effort.
+            // A student is considered 100% in skills if they match 1.5x the department average.
+            const targetPoint = deptAvgRewards * 1.5;
+            skillScore = Math.min(100, (Number(rewardPoints) / targetPoint) * 100);
         }
         // deptAvgRewards === 0 → null (not 0): new dept, no data yet
     }
 
     /* ------------------------------------------------------------------ */
     /* 5. RECOVERY SCORE (15%)                                              */
-    /* Academic improvement across evaluation cycles.                       */
-    /* RULE: Recovery is NULL when AcademicScore is NULL — derived metric.  */
+    /* Academic & Attendance improvement across evaluation cycles.          */
+    /* RULE: Recovery requires either Academic or Attendance data.          */
     /* ------------------------------------------------------------------ */
     let recoveryScore = null;
 
-    if (academicScore !== null) {
+    if (academicScore !== null || attendanceScore !== null) {
         if (history && history.length > 0) {
             // History sorted ASC — last element is the most-recent past cycle
-            const prevAcademic = history[history.length - 1].academic_score;
-            if (hasValue(prevAcademic)) {
-                recoveryScore = clamp(0, 100, 70 + (academicScore - Number(prevAcademic)));
+            const prev = history[history.length - 1];
+            
+            let recoveryPoints = 70; // Baseline
+            let components = 0;
+
+            // 1. Academic Growth Logic
+            if (academicScore !== null && hasValue(prev.academic_score)) {
+                const academicGrowth = (academicScore - Number(prev.academic_score));
+                recoveryPoints += academicGrowth;
+                components++;
+            }
+
+            // 2. Attendance Growth Logic (Scaled slightly so marks matter more, but attendance still helps)
+            if (attendanceScore !== null && hasValue(prev.attendance_score)) {
+                const attendanceGrowth = (attendanceScore - Number(prev.attendance_score));
+                recoveryPoints += (attendanceGrowth * 0.5); 
+                components++;
+            }
+
+            if (components > 0) {
+                recoveryScore = clamp(0, 100, recoveryPoints);
             } else {
-                // History exists but academic_score not recorded — use baseline
-                recoveryScore = 70;
+                recoveryScore = 70; // Fallback baseline if previous stats were missing
             }
         } else {
             // No prior history — neutral baseline
             recoveryScore = 70;
         }
     }
-    // If academicScore is null → recoveryScore stays null (per Issue 1 & 5)
+    // If both are null → recoveryScore stays null
 
     /* ------------------------------------------------------------------ */
     /* WEIGHTED FINAL SCORE — dynamic weight normalisation                  */
@@ -229,7 +257,7 @@ const calculateAdaptability = ({
         skills: skillScore !== null ? 'Computed' : (deptAvgRewards === 0 ? 'Dept Avg Unavailable' : 'No Reward Data'),
         recovery: recoveryScore !== null
             ? (history && history.length > 0 ? 'Trend Computed' : 'Baseline (No History)')
-            : 'Requires Academic Data',
+            : 'Requires Academic/Attendance Data',
     };
 
     return {
